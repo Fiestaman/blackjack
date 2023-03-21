@@ -1,15 +1,25 @@
 // initialize player and dealer objects
 let p = {
+  name: "p",
+  nick: "player",
   balance: 100,
   bet: 1,
   maxBal: 100,
   hand: [],
-  pS: 0,
+  splitHand: [],
+  hS: 0,
+  sHS: 0,
+  handBet: 1,
+  splitHB: 1,
 };
 let d = {
+  name: "d",
+  nick: "dealer",
   hand: [],
-  dS: 0,
+  hS: 0,
 };
+let highScore = 100;
+let inRound = false;
 
 // random card picker
 function pickCard() {
@@ -18,82 +28,217 @@ function pickCard() {
 
 // deal hand function
 function dealHand() {
-  for (i = 1; i <= 2; i++) {
-    p.hand.push(pickCard());
-    d.hand.push(pickCard());
-  }
+  dealCard(p);
+  dealCard(d);
+  dealCard(p);
 }
 
 // compare hand values to determine winner
 function scoreHand() {
-  if (d.dS > 21) {
+  // if (p.hS > 21) {
+  //   console.log(`You busted. You lose.`);
+  // } else
+  if (d.hS > 21) {
     console.log(`Dealer busted. You win.`);
-  } else if (d.dS > p.pS) {
-    console.log(`Dealer had ${d.dS} while you had ${p.pS}. You lose.`);
-  } else if (p.pS > d.dS) {
-    console.log(`You had ${p.pS} while dealer had ${d.dS}. You win!`);
-  } else if (p.pS == d.dS) {
+    p.balance = +p.balance + p.handBet * 2;
+    balUp();
+  } else if (d.hS > p.hS) {
+    console.log(`Dealer had ${d.hS} while you had ${p.hS}. You lose.`);
+  } else if (p.hS > d.hS) {
+    console.log(`You had ${p.hS} while dealer had ${d.hS}. You win!`);
+    p.balance = +p.balance + p.handBet * 4;
+    balUp();
+  } else if (p.hS == d.hS) {
     console.log(`You push with the dealer. Bet refunded.`);
+    p.balance = +p.balance + p.handBet;
+    balUp();
   }
+  inRound = false;
+  if (p.balance > highScore) {
+    highScore = p.balance;
+    scoreUp();
+  }
+  // losing parameter
+  checkLoss();
+  return;
 }
 
 // deal a card function
 function dealCard(player) {
   player.hand.push(pickCard());
-}
-
-// increase bet function
-function increase(amt = 1) {
-  if (bet + amt > balance) {
-    `You do not have enough funds to bet that much.`;
-  }
-  bet += amt;
-}
-
-// decrease bet function
-function decrease(amt = 1) {
-  if (bet + amt > balance) {
-    `You do not have enough funds to bet that much.`;
-  }
-  bet -= amt;
+  player.hS +=
+    player.hand[player.hand.length - 1] > 10
+      ? 10
+      : player.hand[player.hand.length - 1] == 1 && player.hS <= 10
+      ? 11
+      : player.hand[player.hand.length - 1];
+  const newCard = document.createElement("div");
+  newCard.classList.add("card");
+  newCard.setAttribute("id", `${player.name}Card${player.hand.length - 1}`);
+  newCard.style.backgroundImage = displayCard(
+    player.hand[player.hand.length - 1]
+  );
+  document.querySelector(`#${player.nick}Cards`).appendChild(newCard);
 }
 
 // reset balance function
 function reset() {
   p.balance = 100;
-}
-
-// losing parameter
-if (p.balance <= 0) {
-  console.log(`You're bankrupt. Your highest balance was: ${maxBal}`);
+  document.querySelector("#balance").innerHTML = 100;
 }
 
 // player hit function
 function hit() {
-  dealCard(p);
+  if (inRound) {
+    if (p.hS > 21) {
+      console.log(`You've already busted. Click stand to continue.`);
+    } else {
+      dealCard(p);
+    }
+    if (p.hS > 21) {
+      console.log(`You busted.`);
+      inRound = false;
+      return;
+    }
+  }
+}
+
+// stand function
+function stand() {
+  if (inRound) {
+    let child = document.querySelector("#dCard0");
+    console.log(child);
+    document.querySelector("#dealerCards").removeChild(child);
+    dealerDeal();
+    scoreHand();
+  }
+}
+
+// split function
+function split() {
+  p.splitHand = [];
+  p.sHS = 0;
+  p.splitHand.push(p.hand.pop());
+  p.splitHB = p.handBet;
+}
+
+// double down function
+function double() {
+  if (p.hand.length == 2) {
+    p.bet *= 2;
+    dealCard(p);
+    stand();
+  } else {
+    console.log(`You can only double down after initial deal.`);
+  }
+}
+
+// dealer deal own hand function
+function dealerDeal() {
+  while (d.hS < 17) {
+    dealCard(d);
+  }
+}
+
+// check loss function
+function checkLoss() {
+  if (p.balance <= 0) {
+    console.log(`You're bankrupt. Your max balance was: ${p.maxBal}`);
+    inRound = false;
+    return true;
+  }
+}
+
+// update GUI functions
+
+// update balance function
+function balUp() {
+  document.querySelector("#balance").innerHTML = p.balance;
+}
+
+// update score function
+function scoreUp() {
+  document.querySelector("#highScore").innerHTML = highScore;
+}
+
+// update current bet function
+function betUp() {
+  document.querySelector("#currentBet").innerHTML = p.bet;
+}
+
+// change innerHTML to display correct card
+function displayCard(card) {
+  if (card == 13) {
+    return "url(images/PLAYING_CARD_KING_OF_SPADES.svg)";
+  } else if (card == 12) {
+    return "url(images/PLAYING_CARD_QUEEN_OF_SPADES.svg)";
+  } else if (card == 11) {
+    return "url(images/PLAYING_CARD_JACK_OF_SPADES.svg)";
+  } else if (card == 10) {
+    return "url(images/PLAYING_CARD_TEN_OF_SPADES.svg)";
+  } else if (card == 9) {
+    return "url(images/PLAYING_CARD_NINE_OF_SPADES.svg)";
+  } else if (card == 8) {
+    return "url(images/PLAYING_CARD_EIGHT_OF_SPADES.svg)";
+  } else if (card == 7) {
+    return "url(images/PLAYING_CARD_SEVEN_OF_SPADES.svg)";
+  } else if (card == 6) {
+    return "url(images/PLAYING_CARD_SIX_OF_SPADES.svg)";
+  } else if (card == 5) {
+    return "url(images/PLAYING_CARD_FIVE_OF_SPADES.svg)";
+  } else if (card == 4) {
+    return "url(images/PLAYING_CARD_FOUR_OF_SPADES.svg)";
+  } else if (card == 3) {
+    return "url(images/PLAYING_CARD_THREE_OF_SPADES.svg)";
+  } else if (card == 2) {
+    return "url(images/PLAYING_CARD_TWO_OF_SPADES.svg)";
+  } else if (card == 1) {
+    return "url(images/PLAYING_CARD_ACE_OF_SPADES.svg)";
+  }
 }
 
 // play round function
 function playRound() {
-  p.pS = 0;
-  d.dS = 0;
+  inRound = true;
+  if (checkLoss()) return;
+  p.hS = 0;
+  d.hS = 0;
+  p.handBet = p.bet;
+  p.balance -= p.handBet;
+  balUp();
+  p.hand = [];
+  d.hand = [];
+  document.querySelector("#playerCards").innerHTML = "";
+  document.querySelector("#dealerCards").innerHTML =
+    '<div class="card" id="dCard0"></div>';
   dealHand();
-  for (let i = 0; i < p.hand.length; i++) {
-    p.pS += p.hand[i] > 10 ? 10 : p.hand[i];
-  }
-  for (let i = 0; i < d.hand.length; i++) {
-    d.dS += d.hand[i] > 10 ? 10 : d.hand[i];
-  }
-  // if clicked element is hit
-  // hit()
-  // else if clicked element is stand
-  while (d.dS < 17) {
-    dealCard(d);
-    d.dS += d.hand[d.hand.length - 1];
-  }
-
-  scoreHand();
   console.log(p.hand, d.hand);
 }
 
-playRound();
+// event handlers
+document.querySelector("#set").addEventListener("click", function () {
+  if (!inRound && document.querySelector("#betAmt").value <= p.balance) {
+    p.bet = +document.querySelector("#betAmt").value;
+    betUp();
+    // console.log(p.bet, p.handBet);
+  } else if (document.querySelector("#betAmt").value > p.balance) {
+    console.log(`You do not have enough funds to bet that amount.`);
+  }
+});
+
+document.querySelector("#deal").addEventListener("click", function () {
+  if (!inRound) {
+    p.handBet = p.bet;
+    playRound();
+  }
+});
+
+document.querySelector("#hit").addEventListener("click", hit);
+
+document.querySelector("#stand").addEventListener("click", stand);
+
+document.querySelector("#double").addEventListener("click", double);
+
+document.querySelector("#reset").addEventListener("click", reset);
+
+// playRound();
