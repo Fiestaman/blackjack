@@ -9,39 +9,54 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <section id="bets">
-      <div class="currentBet">Current bet: <span id="currentBet">1</span></div>
-      <input
-        type="number"
-        id="betAmt"
-        min="1"
-        placeholder="Bet amount"
-        value="1"
-      />
-      <button id="set">SET BET</button>
-      <button id="deal">FINALIZE BET & DEAL HAND</button>
-    </section>
-    <main>
-      <section id="dealerCards">
-        <div class="card" id="dCard0"></div>
-        <div class="card" id="dCard1"></div>
+    <h1 id="title">
+      <span class="odd">B</span><span class="even">L</span
+      ><span class="odd">A</span><span class="even">C</span
+      ><span class="odd">K</span><span class="even">J</span
+      ><span class="odd">A</span><span class="even">C</span
+      ><span class="odd">K</span>
+    </h1>
+    <div id="game">
+      <section id="bets">
+        <div class="currentBet">
+          Current bet: <span id="currentBet">1</span>
+        </div>
+        <input
+          type="number"
+          id="betAmt"
+          min="1"
+          placeholder="Bet amount"
+          value="1"
+        />
+        <button id="set">SET BET</button>
+        <br />
+        <button id="deal">DEAL</button>
       </section>
-      <button id="hit">HIT</button>
-      <button id="stand">STAND</button>
-      <button id="double">DOUBLE DOWN</button>
-      <!-- <button id="split">SPLIT</button> -->
-      <section id="playerCards">
-        <div class="card" id="pCard0"></div>
-        <div class="card" id="pCard1"></div>
-      </section>
-    </main>
-    <aside>
-      <h1>High Score: <span id="highScore">100</span></h1>
-      <h3>Current balance: <span id="balance">100</span></h3>
-      <button id="reset">RESET BALANCE</button>
-
-      <!-- <button id="increase">INCREASE BET</button> -->
-      <!-- <button id="decrease">DECREASE BET</button> -->
-    </aside>
+      <main>
+        <section class="flex" id="dealerCards">
+          <div class="card" id="dCard0"></div>
+          <div class="card" id="dCard1"></div>
+        </section>
+        <section class="flex" id="midBtns">
+          <button id="hit">HIT</button>
+          <button id="stand">STAND</button>
+          <button id="double">DOUBLE<br />DOWN</button>
+        </section>
+        <section class="flex" id="playerCards">
+          <div class="card" id="pCard0"></div>
+          <div class="card" id="pCard1"></div>
+        </section>
+      </main>
+      <aside>
+        <div id="status">
+          <h1>High Score: <span id="highScore">100</span></h1>
+          <h3>Current balance: <span id="balance">100</span></h3>
+        </div>
+        <div id="resetDiv">
+          <button id="reset">RESET<br />BALANCE</button>
+        </div>
+      </aside>
+    </div>
+    <div id="output"></div>
   </body>
 </html>

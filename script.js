@@ -28,6 +28,7 @@ function pickCard() {
 
 // deal hand function
 function dealHand() {
+  outputUp(`You bet ${p.bet} and the hand is dealt.`);
   dealCard(p);
   dealCard(d);
   dealCard(p);
@@ -35,21 +36,20 @@ function dealHand() {
 
 // compare hand values to determine winner
 function scoreHand() {
-  // if (p.hS > 21) {
-  //   console.log(`You busted. You lose.`);
-  // } else
-  if (d.hS > 21) {
-    console.log(`Dealer busted. You win.`);
+  if (p.hS > 21) {
+    outputUp(`You busted. You lose.`);
+  } else if (d.hS > 21) {
+    outputUp(`Dealer busted. You win.`);
     p.balance = +p.balance + p.handBet * 2;
     balUp();
   } else if (d.hS > p.hS) {
-    console.log(`Dealer had ${d.hS} while you had ${p.hS}. You lose.`);
+    outputUp(`Dealer had ${d.hS} while you had ${p.hS}. You lose.`);
   } else if (p.hS > d.hS) {
-    console.log(`You had ${p.hS} while dealer had ${d.hS}. You win!`);
-    p.balance = +p.balance + p.handBet * 4;
+    outputUp(`You had ${p.hS} while dealer had ${d.hS}. You win!`);
+    p.balance = +p.balance + p.handBet * 2;
     balUp();
   } else if (p.hS == d.hS) {
-    console.log(`You push with the dealer. Bet refunded.`);
+    outputUp(`You push with the dealer. Bet refunded.`);
     p.balance = +p.balance + p.handBet;
     balUp();
   }
@@ -91,12 +91,12 @@ function reset() {
 function hit() {
   if (inRound) {
     if (p.hS > 21) {
-      console.log(`You've already busted. Click stand to continue.`);
+      outputUp(`You've already busted. Click stand to continue.`);
     } else {
       dealCard(p);
     }
     if (p.hS > 21) {
-      console.log(`You busted.`);
+      outputUp(`You busted.`);
       inRound = false;
       return;
     }
@@ -107,7 +107,6 @@ function hit() {
 function stand() {
   if (inRound) {
     let child = document.querySelector("#dCard0");
-    console.log(child);
     document.querySelector("#dealerCards").removeChild(child);
     dealerDeal();
     scoreHand();
@@ -125,11 +124,12 @@ function split() {
 // double down function
 function double() {
   if (p.hand.length == 2) {
-    p.bet *= 2;
+    p.balance -= p.handBet;
+    p.handBet *= 2;
     dealCard(p);
     stand();
   } else {
-    console.log(`You can only double down after initial deal.`);
+    outputUp(`You can only double down after initial deal.`);
   }
 }
 
@@ -143,7 +143,7 @@ function dealerDeal() {
 // check loss function
 function checkLoss() {
   if (p.balance <= 0) {
-    console.log(`You're bankrupt. Your max balance was: ${p.maxBal}`);
+    outputUp(`You're bankrupt. Your max balance was: ${p.maxBal}`);
     inRound = false;
     return true;
   }
@@ -164,6 +164,10 @@ function scoreUp() {
 // update current bet function
 function betUp() {
   document.querySelector("#currentBet").innerHTML = p.bet;
+}
+
+function outputUp(msg) {
+  document.querySelector("#output").innerHTML = `${msg}`;
 }
 
 // change innerHTML to display correct card
@@ -212,7 +216,6 @@ function playRound() {
   document.querySelector("#dealerCards").innerHTML =
     '<div class="card" id="dCard0"></div>';
   dealHand();
-  console.log(p.hand, d.hand);
 }
 
 // event handlers
@@ -220,9 +223,8 @@ document.querySelector("#set").addEventListener("click", function () {
   if (!inRound && document.querySelector("#betAmt").value <= p.balance) {
     p.bet = +document.querySelector("#betAmt").value;
     betUp();
-    // console.log(p.bet, p.handBet);
   } else if (document.querySelector("#betAmt").value > p.balance) {
-    console.log(`You do not have enough funds to bet that amount.`);
+    outputUp(`You do not have enough funds to bet that amount.`);
   }
 });
 
@@ -240,5 +242,3 @@ document.querySelector("#stand").addEventListener("click", stand);
 document.querySelector("#double").addEventListener("click", double);
 
 document.querySelector("#reset").addEventListener("click", reset);
-
-// playRound();
